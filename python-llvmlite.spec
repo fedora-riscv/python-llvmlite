@@ -67,6 +67,10 @@ Documentation for %{name}.
 %prep
 %forgeautosetup -p1
 
+# seems to be fine with 3.11 but we need to loosen the guard
+# see also: “python 3.10 support” https://github.com/numba/llvmlite/issues/740
+sed -i 's/max_python_version =.*/max_python_version = "3.12"/' setup.py
+
 # increase verbosity of tests to 2
 sed -i 's/\(def run_tests.*verbosity=\)1/\12/' llvmlite/tests/__init__.py
 
