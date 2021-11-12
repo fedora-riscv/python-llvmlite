@@ -13,6 +13,11 @@ License:        BSD
 URL:            http://llvmlite.pydata.org/
 Source0:        %{forgesource}
 
+# Python 3.10
+# https://github.com/numba/llvmlite/pull/769
+# See also: https://github.com/numba/llvmlite/issues/740#issuecomment-937830985
+Patch0:         https://github.com/numba/llvmlite/pull/769.patch
+
 BuildRequires:  pyproject-rpm-macros
 BuildRequires:  python3-devel
 # 0.37.0 only supports llvm11
@@ -60,11 +65,7 @@ BuildRequires:  %{py3_dist sphinx-rtd-theme}
 Documentation for %{name}.
 
 %prep
-%forgesetup
-
-# seems to be fine with 3.10 but we need to remove the guard
-# https://github.com/numba/llvmlite/issues/740
-sed -i 's/max_python_version =.*/max_python_version = "3.11"/' setup.py
+%forgeautosetup -p1
 
 # increase verbosity of tests to 2
 sed -i 's/\(def run_tests.*verbosity=\)1/\12/' llvmlite/tests/__init__.py

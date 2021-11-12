@@ -1,0 +1,170 @@
+From 34a85c218423b959b66a8aa74986423d280bcba6 Mon Sep 17 00:00:00 2001
+From: Valentin Haenel <vhaenel@anaconda.com>
+Date: Tue, 31 Aug 2021 15:24:24 +0200
+Subject: [PATCH 1/5] bump supported Pyton version
+
+As title
+---
+ setup.py | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/setup.py b/setup.py
+index 263fb6c6..75a6d42c 100644
+--- a/setup.py
++++ b/setup.py
+@@ -33,7 +33,7 @@
+ 
+ 
+ min_python_version = "3.7"
+-max_python_version = "3.10"  # exclusive
++max_python_version = "3.11"  # exclusive
+ 
+ 
+ def _guard_py_ver():
+
+From 87c86ae5e9cc9005d2a7ef64cdf8bcd05e3e4067 Mon Sep 17 00:00:00 2001
+From: Valentin Haenel <vhaenel@anaconda.com>
+Date: Tue, 31 Aug 2021 15:24:35 +0200
+Subject: [PATCH 2/5] update trove classifiers
+
+As title
+---
+ setup.py | 1 +
+ 1 file changed, 1 insertion(+)
+
+diff --git a/setup.py b/setup.py
+index 75a6d42c..b390db91 100644
+--- a/setup.py
++++ b/setup.py
+@@ -212,6 +212,7 @@ def finalize_options(self):
+           "Programming Language :: Python :: 3.7",
+           "Programming Language :: Python :: 3.8",
+           "Programming Language :: Python :: 3.9",
++          "Programming Language :: Python :: 3.10",
+           "Topic :: Software Development :: Code Generators",
+           "Topic :: Software Development :: Compilers",
+       ],
+
+From 334c000d5a6d19133e3ce3b7a2c847cd682f4ebf Mon Sep 17 00:00:00 2001
+From: Valentin Haenel <vhaenel@anaconda.com>
+Date: Thu, 2 Sep 2021 14:23:39 +0200
+Subject: [PATCH 3/5] print the OSError instead of swallowing it
+
+As title
+---
+ llvmlite/binding/ffi.py | 3 ++-
+ 1 file changed, 2 insertions(+), 1 deletion(-)
+
+diff --git a/llvmlite/binding/ffi.py b/llvmlite/binding/ffi.py
+index 94df3ae7..66254f99 100644
+--- a/llvmlite/binding/ffi.py
++++ b/llvmlite/binding/ffi.py
+@@ -183,7 +183,8 @@ def __call__(self, *args, **kwargs):
+ for _lib_path in _lib_paths:
+     try:
+         lib = ctypes.CDLL(_lib_path)
+-    except OSError:
++    except OSError as e:
++        print(e)
+         continue
+     else:
+         break
+
+From 8cc3c39515ac03dc77d3b8ea4370513cec0e4308 Mon Sep 17 00:00:00 2001
+From: Valentin Haenel <vhaenel@anaconda.com>
+Date: Wed, 13 Oct 2021 11:02:51 +0200
+Subject: [PATCH 4/5] buffer all errors, and echo them at the end
+
+This will avoid printing errors unnecessarily.
+---
+ llvmlite/binding/ffi.py | 7 +++++--
+ 1 file changed, 5 insertions(+), 2 deletions(-)
+
+diff --git a/llvmlite/binding/ffi.py b/llvmlite/binding/ffi.py
+index 66254f99..556c7c8f 100644
+--- a/llvmlite/binding/ffi.py
++++ b/llvmlite/binding/ffi.py
+@@ -180,16 +180,19 @@ def __call__(self, *args, **kwargs):
+ 
+ 
+ # Try to load from all of the different paths
++errors = []
+ for _lib_path in _lib_paths:
+     try:
+         lib = ctypes.CDLL(_lib_path)
+     except OSError as e:
+-        print(e)
++        errors.append(e)
+         continue
+     else:
+         break
+ else:
+-    raise OSError("Could not load shared object file: {}".format(_lib_name))
++    msg = ("Could not load shared object file: {}\n".format(_lib_name) +
++           "Errors were: {}".format(errors))
++    raise OSError(msg)
+ 
+ 
+ lib = _lib_wrapper(lib)
+
+From 408c7ba935b43e052410a2bf444db9b8a56a4723 Mon Sep 17 00:00:00 2001
+From: Valentin Haenel <vhaenel@anaconda.com>
+Date: Wed, 13 Oct 2021 18:52:53 +0200
+Subject: [PATCH 5/5] setup using Python 3.10 on public CI too
+
+As title
+---
+ azure-pipelines.yml                  | 11 +++++++++++
+ buildscripts/azure/azure-windows.yml |  3 +++
+ 2 files changed, 14 insertions(+)
+
+diff --git a/azure-pipelines.yml b/azure-pipelines.yml
+index d1d5efd3..a99d90d4 100644
+--- a/azure-pipelines.yml
++++ b/azure-pipelines.yml
+@@ -14,6 +14,9 @@ jobs:
+       py39:
+         PYTHON: '3.9'
+         CONDA_ENV: cienv
++      py310:
++        PYTHON: '3.10'
++        CONDA_ENV: cienv
+ 
+ - template: buildscripts/azure/azure-linux-macos.yml
+   parameters:
+@@ -31,6 +34,10 @@ jobs:
+         PYTHON: '3.9'
+         CONDA_ENV: cienv
+         RUN_FLAKE8: yes
++      py310:
++        PYTHON: '3.10'
++        CONDA_ENV: cienv
++        RUN_FLAKE8: yes
+ # temporarily disabled
+ #       pypy:
+ #         PYTHON: pypy
+@@ -47,6 +54,10 @@ jobs:
+         PYTHON: '3.9'
+         CONDA_ENV: cienv
+         WHEEL: 'yes'
++      py310_wheel:
++        PYTHON: '3.10'
++        CONDA_ENV: cienv
++        WHEEL: 'yes'
+ 
+ - template: buildscripts/azure/azure-windows.yml
+   parameters:
+diff --git a/buildscripts/azure/azure-windows.yml b/buildscripts/azure/azure-windows.yml
+index 1dd02611..e51f39fc 100644
+--- a/buildscripts/azure/azure-windows.yml
++++ b/buildscripts/azure/azure-windows.yml
+@@ -12,6 +12,9 @@ jobs:
+       py39:
+         PYTHON: '3.9'
+         CONDA_ENV: cienv
++      py310:
++        PYTHON: '3.10'
++        CONDA_ENV: cienv
+ 
+ 
+   steps:
