@@ -8,7 +8,7 @@
 %global forgeurl     https://github.com/numba/llvmlite
 
 Name:           python-llvmlite
-Version:        0.37.0
+Version:        0.39.1
 Release:        %{autorelease}
 Summary:        Lightweight LLVM Python binding for writing JIT compilers
 
@@ -30,14 +30,9 @@ License:        BSD-2-Clause AND LicenseRef-Fedora-Public-Domain
 URL:            http://llvmlite.pydata.org/
 Source0:        %{forgesource}
 
-# Python 3.10
-# https://github.com/numba/llvmlite/pull/769
-# See also: https://github.com/numba/llvmlite/issues/740#issuecomment-937830985
-Patch0:         https://github.com/numba/llvmlite/pull/769.patch
-
 BuildRequires:  pyproject-rpm-macros
 BuildRequires:  python3-devel
-# 0.37.0 only supports llvm11
+# 0.39.1 only supports llvm11
 BuildRequires:  llvm11-devel
 BuildRequires:  gcc-c++
 
