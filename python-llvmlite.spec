@@ -1,4 +1,9 @@
 %bcond_without tests
+# Sphinx-generated HTML documentation is not suitable for packaging; see
+# https://bugzilla.redhat.com/show_bug.cgi?id=2006555 for discussion.
+#
+# We can generate PDF documentation as a substitute.
+%bcond_without doc_pdf
 
 %global forgeurl     https://github.com/numba/llvmlite
 
@@ -58,8 +63,14 @@ Summary:        %{summary}
 
 %package doc
 Summary:        %{summary}
-BuildRequires:  %{py3_dist sphinx}
-BuildRequires:  %{py3_dist sphinx-rtd-theme}
+%if %{with doc_pdf}
+BuildRequires:  make
+BuildRequires:  python3dist(sphinx)
+BuildRequires:  python3-sphinx-latex
+BuildRequires:  latexmk
+# The HTML theme is imported in conf.py even when not generating HTML
+BuildRequires:  python3dist(sphinx-rtd-theme)
+%endif
 
 %description doc
 Documentation for %{name}.
@@ -78,6 +89,9 @@ sed -i 's/\(def run_tests.*verbosity=\)1/\12/' llvmlite/tests/__init__.py
 # Can use something similar to correct/remove /usr/bin/python shebangs also
 # find . -type f -name "*.py" -exec sed -i '/^#![  ]*\/usr\/bin\/env.*$/ d' {} 2>/dev/null ';'
 
+# No network access
+echo 'intersphinx_mapping.clear()' >> docs/source/conf.py
+
 %generate_buildrequires
 %pyproject_buildrequires
 
@@ -85,8 +99,10 @@ sed -i 's/\(def run_tests.*verbosity=\)1/\12/' llvmlite/tests/__init__.py
 export LLVM_CONFIG="%{_libdir}/llvm11/bin/llvm-config"
 %pyproject_wheel
 
-make -C docs SPHINXBUILD=sphinx-build-3 html
-rm -rf docs/_build/html/{.doctrees,.buildinfo,_static/EMPTY} -vf
+%if %{with doc_pdf}
+%make_build -C docs latex SPHINXOPTS='%{?_smp_mflags}'
+%make_build -C docs/_build/latex LATEXMKOPTS='-quiet'
+%endif
 
 %install
 %pyproject_install
@@ -102,7 +118,10 @@ LD_LIBRARY_PATH="%{buildroot}%{python3_sitearch}/llvmlite/binding/" PYTHONPATH="
 
 %files doc
 %license LICENSE
-%doc docs/_build/html examples/
+%doc examples/
+%if %{with doc_pdf}
+%doc docs/_build/latex/llvmlite.pdf
+%endif
 
 %changelog
 %autochangelog
