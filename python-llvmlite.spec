@@ -14,7 +14,19 @@ Summary:        Lightweight LLVM Python binding for writing JIT compilers
 
 %forgemeta
 
-License:        BSD
+# The entire source is BSD-2-Clause, except:
+#   - The bundled versioneer.py, and the _version.py it generates (which is
+#     packaged) is LicenseRef-Fedora-Public-Domain. In later versions of
+#     versioneer, this becomes CC0-1.0 and then Unlicense.
+# Additionally, the following does not affect the license of the binary RPMs:
+#   - conda-recipes/appveyor/run_with_env.cmd is CC0-1.0; for distribution in
+#     the source RPM, it is covered by “Existing uses of CC0-1.0 on code files
+#     in Fedora packages prior to 2022-08-01, and subsequent upstream versions
+#     of those files in those packages, continue to be allowed. We encourage
+#     Fedora package maintainers to ask upstreams to relicense such files.”
+#     https://gitlab.com/fedora/legal/fedora-license-data/-/issues/91#note_1151947383
+License:        BSD-2-Clause AND LicenseRef-Fedora-Public-Domain
+
 URL:            http://llvmlite.pydata.org/
 Source0:        %{forgesource}
 
