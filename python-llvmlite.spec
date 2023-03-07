@@ -30,6 +30,19 @@ License:        BSD-2-Clause AND LicenseRef-Fedora-Public-Domain
 URL:            http://llvmlite.pydata.org/
 Source0:        %{forgesource}
 
+# Patch out maximum Python version check
+#
+# Fedora must build this package with the current version of Python,
+# whether upstream is ready or not.
+#
+# Feature request / discussion issue for doing this without a patch:
+#   “Escape hatch” for maximum Python version check
+#   https://github.com/numba/llvmlite/issues/912
+# See also:
+#   python 3.10 support
+#   https://github.com/numba/llvmlite/issues/740
+Patch:          0001-Patch-out-maximum-Python-version-check.patch
+
 BuildRequires:  pyproject-rpm-macros
 BuildRequires:  python3-devel
 # 0.39.1 only supports llvm11
@@ -84,10 +97,6 @@ Documentation for %{name}.
 
 %prep
 %forgeautosetup -p1
-
-# seems to be fine with 3.11 and 3.12, but we need to loosen the guard
-# see also: “python 3.10 support” https://github.com/numba/llvmlite/issues/740
-sed -i 's/max_python_version =.*/max_python_version = "3.13"/' setup.py
 
 # increase verbosity of tests to 2
 sed -i 's/\(def run_tests.*verbosity=\)1/\12/' llvmlite/tests/__init__.py
