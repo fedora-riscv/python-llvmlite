@@ -47,8 +47,8 @@ Source0:        %{forgesource}
 # To be released in 0.40.0 and 0.41.0. Cherry-picked onto tag v0.39.1:
 Patch:          0001-Remove-maximum-Python-version-limit.patch
 
-BuildRequires:  pyproject-rpm-macros
 BuildRequires:  python3-devel
+
 # 0.39.1 only supports llvm11
 BuildRequires:  llvm11-devel
 BuildRequires:  gcc-c++
