@@ -130,7 +130,7 @@ export LLVM_CONFIG="%{_libdir}/llvm11/bin/llvm-config"
 
 %check
 %if %{with tests}
-LD_LIBRARY_PATH="%{buildroot}%{python3_sitearch}/llvmlite/binding/" PYTHONPATH="$PYTHONPATH:%{buildroot}%{python3_sitearch}:%{buildroot}%{python3_sitelib}" %{python3} runtests.py
+PYTHONPATH='%{buildroot}%{python3_sitearch}' %{python3} runtests.py
 %endif
 
 %files -n python3-llvmlite -f %{pyproject_files}
