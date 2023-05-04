@@ -6,7 +6,7 @@
 %bcond_without doc_pdf
 
 Name:           python-llvmlite
-Version:        0.39.1
+Version:        0.40.0
 Release:        %{autorelease}
 Summary:        Lightweight LLVM Python binding for writing JIT compilers
 
@@ -30,24 +30,10 @@ URL:            http://llvmlite.pydata.org/
 %global forgeurl https://github.com/numba/llvmlite
 Source0:        %{forgeurl}/archive/v%{version}/llvmlite-%{version}.tar.gz
 
-# Backport upstream commit:
-#   Remove maximum Python version limit
-#
-#   Allow any new version of Python for llvmlite. Closes #912
-#   https://github.com/numba/llvmlite/commit/9ea5668fff6d0e4099d7907aafae40df5b4c8655
-# Fixes:
-#   “Escape hatch” for maximum Python version check
-#   https://github.com/numba/llvmlite/issues/912
-# See also:
-#   python 3.10 support
-#   https://github.com/numba/llvmlite/issues/740
-# To be released in 0.40.0 and 0.41.0. Cherry-picked onto tag v0.39.1:
-Patch:          0001-Remove-maximum-Python-version-limit.patch
-
 BuildRequires:  python3-devel
 
-# 0.39.1 only supports llvm11
-BuildRequires:  llvm11-devel
+# 0.40.0 only supports llvm14
+BuildRequires:  llvm14-devel
 BuildRequires:  gcc-c++
 
 %global _description %{expand:
@@ -95,11 +81,22 @@ sed -i 's/\(def run_tests.*verbosity=\)1/\12/' llvmlite/tests/__init__.py
 # No network access
 echo 'intersphinx_mapping.clear()' >> docs/source/conf.py
 
+%ifarch ppc64le
+# Test failure in 0.40.0 on 64-bit PowerPC: test_get_process_triple
+# https://github.com/numba/llvmlite/issues/941
+#
+# We can skip this failure because upstream considers the discrepancy harmless.
+# https://github.com/numba/llvmlite/issues/941#issuecomment-1542381275
+sed -r -i \
+    's/^([[:blank:]]*)(def test_get_process_triple\()/\1@unittest.skip("Issue #941")\n&/' \
+    llvmlite/tests/test_binding.py
+%endif
+
 %generate_buildrequires
 %pyproject_buildrequires
 
 %build
-export LLVM_CONFIG="%{_libdir}/llvm11/bin/llvm-config"
+export LLVM_CONFIG="%{_libdir}/llvm14/bin/llvm-config"
 %pyproject_wheel
 
 %if %{with doc_pdf}
