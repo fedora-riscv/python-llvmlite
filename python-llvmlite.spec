@@ -5,14 +5,10 @@
 # We can generate PDF documentation as a substitute.
 %bcond_without doc_pdf
 
-%global forgeurl     https://github.com/numba/llvmlite
-
 Name:           python-llvmlite
 Version:        0.39.1
 Release:        %{autorelease}
 Summary:        Lightweight LLVM Python binding for writing JIT compilers
-
-%forgemeta
 
 # The entire source is BSD-2-Clause, except:
 #   - The bundled versioneer.py, and the _version.py it generates (which is
@@ -31,7 +27,8 @@ Summary:        Lightweight LLVM Python binding for writing JIT compilers
 License:        BSD-2-Clause AND LicenseRef-Fedora-Public-Domain
 
 URL:            http://llvmlite.pydata.org/
-Source0:        %{forgesource}
+%global forgeurl https://github.com/numba/llvmlite
+Source0:        %{forgeurl}/archive/v%{version}/llvmlite-%{version}.tar.gz
 
 # Backport upstream commit:
 #   Remove maximum Python version limit
@@ -100,7 +97,7 @@ BuildRequires:  python3dist(sphinx-rtd-theme)
 Documentation for %{name}.
 
 %prep
-%forgeautosetup -p1
+%autosetup -n llvmlite-%{version} -p1
 
 # increase verbosity of tests to 2
 sed -i 's/\(def run_tests.*verbosity=\)1/\12/' llvmlite/tests/__init__.py
