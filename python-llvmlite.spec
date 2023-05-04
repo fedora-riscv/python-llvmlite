@@ -51,28 +51,14 @@ BuildRequires:  llvm11-devel
 BuildRequires:  gcc-c++
 
 %global _description %{expand:
-llvmlite provides a Python binding to LLVM for use in Numba.
+llvmlite is a project originally tailored for Numba‘s needs, using the
+following approach:
 
-Numba previously relied on llvmpy.  While llvmpy exposed large parts of the
-LLVM C++ API for direct calls into the LLVM library, llvmlite takes an entirely
-different approach. Llvmlite starts from the needs of a JIT compiler and splits
-them into two decoupled tasks:
-
-- Construction of a Module, function by function, Instruction by instruction.
-- Compilation and optimization of the module into machine code.
-
-The construction of an LLVM module does not call the LLVM C++ API. Rather, it
-constructs the LLVM intermediate representation (IR) in pure Python. This is
-the role of the IR layer.
-
-The compilation of an LLVM module takes the IR in textual form and feeds it
-into LLVM's parsing API. It then returns a thin wrapper around LLVM's C++
-module object. This is the role of the binding layer.
-
-Once parsed, the module's source code cannot be modified, which loses the
-flexibility of the direct mapping of C++ APIs into Python that was provided by
-llvmpy but saves a great deal of maintenance.}
-
+  • A small C wrapper around the parts of the LLVM C++ API we need that are not
+    already exposed by the LLVM C API.
+  • A ctypes Python wrapper around the C API.
+  • A pure Python implementation of the subset of the LLVM IR builder that we
+    need for Numba.}
 
 %description %_description
 
