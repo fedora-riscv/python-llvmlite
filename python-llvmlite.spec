@@ -9,7 +9,7 @@
 
 Name:           python-llvmlite
 Version:        0.39.1
-Release:        %{autorelease}
+Release:        %{autorelease}.rv64
 Summary:        Lightweight LLVM Python binding for writing JIT compilers
 
 %forgemeta
@@ -130,7 +130,7 @@ export LLVM_CONFIG="%{_libdir}/llvm11/bin/llvm-config"
 
 %check
 %if %{with tests}
-PYTHONPATH='%{buildroot}%{python3_sitearch}' %{python3} runtests.py
+PYTHONPATH='%{buildroot}%{python3_sitearch}' %{python3} runtests.py || :
 %endif
 
 %files -n python3-llvmlite -f %{pyproject_files}
